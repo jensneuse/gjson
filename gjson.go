@@ -2746,6 +2746,7 @@ var modifiers = map[string]func(json, arg string) string{
 	"pretty":  modPretty,
 	"ugly":    modUgly,
 	"reverse": modReverse,
+	"mapToArray": modMapToArray,
 }
 
 // AddModifier binds a custom modifier command to the GJSON syntax.
@@ -2828,4 +2829,39 @@ func modReverse(json, arg string) string {
 		return bytesString(out)
 	}
 	return json
+}
+
+func modMapToArray(json, fieldName string) string {
+	out := make([]byte,0,1024)
+	out = append(out,'{','"')
+	out = append(out,stringBytes(fieldName)...)
+	out = append(out,'"',':','[')
+	parsed := Parse(json)
+	parsed.ForEach(func(key, value Result) bool {
+		if key.String() != fieldName {
+			return true
+		}
+		first := true
+		value.ForEach(func(key, value Result) bool {
+			val := modUgly(value.Raw,"")
+			if first {
+				first = false
+			} else {
+				out = append(out,',')
+			}
+			out = append(out,'{','"')
+			out = append(out,[]byte("key")...)
+			out = append(out,'"',':','"')
+			out = append(out,stringBytes(key.String())...)
+			out = append(out,'"',',','"')
+			out = append(out,[]byte("value")...)
+			out = append(out,'"',':')
+			out = append(out,stringBytes(val)...)
+			out = append(out,'}')
+			return true
+		})
+		return false
+	})
+	out = append(out,']','}')
+	return bytesString(out)
 }

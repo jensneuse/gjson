@@ -1538,6 +1538,78 @@ func TestModifier(t *testing.T) {
 	}
 }
 
+func TestMod_mapToArray(t *testing.T){
+
+	input := `	{
+					"rights": {
+						"foo": {
+							"someProperty": "a"
+						},
+						"bar": {
+							"someProperty": "b"
+						},
+						"baz": {
+							"someProperty": 1
+						}
+					}
+				}`
+
+
+	result := Get(input,"@mapToArray:rights|@ugly")
+
+	expected := `{ "rights": [
+								{
+									"key": "foo",
+									"value": {
+										"someProperty": "a"
+									}
+								},
+								{
+									"key": "bar",
+									"value": {
+										"someProperty": "b"
+									}
+								},
+								{
+									"key": "baz",
+									"value": {
+										"someProperty": 1
+									}
+								}
+							]
+					}`
+
+	expectation := Get(expected,"@ugly")
+
+	if result.Raw != expectation.Raw {
+		t.Fatalf("want:\n%s\n\ngot:\n%s\n",expectation.Raw,result.Raw)
+	}
+}
+
+func BenchmarkMod_mapToArray(b *testing.B){
+
+	input := `	{
+					"rights": {
+						"foo": {
+							"someProperty": "a"
+						},
+						"bar": {
+							"someProperty": "b"
+						},
+						"baz": {
+							"someProperty": 1
+						}
+					}
+				}`
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0;i<b.N;i++{
+		Get(input,"@mapToArray:rights|@ugly")
+	}
+}
+
 func TestChaining(t *testing.T) {
 	json := `{
 		"info": {
