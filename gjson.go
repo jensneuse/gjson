@@ -2831,6 +2831,42 @@ func modReverse(json, arg string) string {
 	return json
 }
 
+/*
+modMapToArray takes a json map and translates it into an array of key value pairs
+the mandatory argument is the fieldName of the json map, see the example below
+
+example:
+
+{
+	"rights": {
+		"foo": {
+			"someProperty": "a"
+		},
+		"bar": {
+			"someProperty": "b"
+		}
+	}
+}
+
+Output := Get(input,"@mapToArray:rights|@ugly")
+
+{ "rights": [
+			{
+				"key": "foo",
+				"value": {
+					"someProperty": "a"
+				}
+			},
+			{
+				"key": "bar",
+				"value": {
+					"someProperty": "b"
+				}
+			}
+		]
+}
+
+*/
 func modMapToArray(json, fieldName string) string {
 	out := make([]byte,0,1024)
 	out = append(out,'{','"')
